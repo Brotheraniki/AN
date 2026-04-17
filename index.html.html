@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amelia vs Nihat: Food Frenzy</title>
+  <style>
+    :root {
+      --bg1: #0f172a;
+      --bg2: #111827;
+      --panel: rgba(15, 23, 42, 0.84);
+      --line: rgba(255,255,255,0.10);
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --pink1: #f472b6;
+      --pink2: #fb7185;
+      --blue1: #22d3ee;
+      --blue2: #3b82f6;
+      --good: #22c55e;
+      --warn: #f59e0b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 10%, rgba(244,114,182,0.16), transparent 22%),
+        radial-gradient(circle at 80% 10%, rgba(34,211,238,0.16), transparent 22%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .wrap {
+      width: min(1180px, 100%);
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.32);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .header {
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(2, 6, 23, 0.24);
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 32px;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: var(--muted);
+      max-width: 760px;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .winner-badge {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.10);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .content {
+      padding: 22px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .stats {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .stat {
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      padding: 14px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .contestants {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .contestant {
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      padding: 18px;
+      transition: box-shadow 120ms ease, transform 120ms ease;
+    }
+
+    .contestant.flash {
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 0 28px rgba(255,255,255,0.24);
+      transform: translateY(-1px);
+    }
+
+    .contestant-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .contestant h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .contestant-sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .face {
+      font-size: 44px;
+      line-height: 1;
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .bar {
+      height: 16px;
+      background: #1e293b;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0%;
+      transition: width 90ms linear;
+    }
+
+    .fill.amelia { background: linear-gradient(90deg, var(--pink1), var(--pink2)); }
+    .fill.nihat { background: linear-gradient(90deg, var(--blue1), var(--blue2)); }
+    .fill.heat { background: linear-gradient(90deg, #f97316, #ef4444); }
+
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      min-height: 112px;
+      align-content: start;
+      font-size: 28px;
+    }
+
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 0.95fr;
+      gap: 18px;
+    }
+
+    .panel {
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      padding: 18px;
+    }
+
+    .panel-title {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .keys {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .keycap {
+      width: 84px;
+      height: 84px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: 700;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+
+    .mobile-buttons {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .tap-btn {
+      border: none;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #334155, #1e293b);
+      color: white;
+      font-size: 34px;
+      font-weight: 700;
+      height: 84px;
+      cursor: pointer;
+    }
+
+    .heat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .mini-note {
+      margin-top: 10px;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    .message-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button.action {
+      border: none;
+      border-radius: 18px;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #0f172a;
+      background: linear-gradient(180deg, #ffffff, #dbeafe);
+    }
+
+    button.action.secondary {
+      background: linear-gradient(180deg, #f1f5f9, #cbd5e1);
+    }
+
+    button.action:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 900px) {
+      .stats,
+      .contestants,
+      .bottom-grid,
+      .message-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 28px; }
+      .mobile-buttons { display: grid; }
+      .desktop-note { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="header">
+        <div>
+          <h1>Amelia vs Nihat: Food Frenzy</h1>
+          <div class="subtitle">
+            Amelia is trying to survive the most unfair eating contest of her life. Nihat eats like a machine, so the only plan is to mash like a maniac and hope for the best.
+          </div>
+        </div>
+        <div id="winnerBadge" class="winner-badge" style="display:none"></div>
+      </div>
+
+      <div class="content">
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">Time</div>
+            <div id="timeValue" class="stat-value">20.0s</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Best Amelia</div>
+            <div id="bestValue" class="stat-value">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Amelia</div>
+            <div id="ameliaValue" class="stat-value">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Nihat</div>
+            <div id="nihatValue" class="stat-value">0</div>
+          </div>
+        </div>
+
+        <div class="contestants">
+          <div id="ameliaCard" class="contestant">
+            <div class="contestant-top">
+              <div>
+                <h2>Amelia</h2>
+                <div class="contestant-sub">You are Amelia, and this is a terrible idea.</div>
+              </div>
+              <div class="face">😤</div>
+            </div>
+            <div class="progress-row">
+              <span>Food progress</span>
+              <span id="ameliaScoreLabel">0</span>
+            </div>
+            <div class="bar"><div id="ameliaBar" class="fill amelia"></div></div>
+            <div id="ameliaFood" class="food-grid"></div>
+          </div>
+
+          <div class="contestant">
+            <div class="contestant-top">
+              <div>
+                <h2>Nihat</h2>
+                <div class="contestant-sub">He is absurdly hard to beat.</div>
+              </div>
+              <div class="face">😈</div>
+            </div>
+            <div class="progress-row">
+              <span>Food progress</span>
+              <span id="nihatScoreLabel">0</span>
+            </div>
+            <div class="bar"><div id="nihatBar" class="fill nihat"></div></div>
+            <div id="nihatFood" class="food-grid"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="heat-row">
+            <span>Amelia mash heat</span>
+            <span id="heatValue">0%</span>
+          </div>
+          <div class="bar"><div id="heatBar" class="fill heat"></div></div>
+          <div class="mini-note">Current streak: <span id="streakValue">0</span> • Best burst: <span id="bestBurstValue">0</span></div>
+        </div>
+
+        <div class="bottom-grid">
+          <div class="panel">
+            <div class="panel-title">Desktop controls</div>
+            <div class="keys">
+              <div class="keycap">A</div>
+              <div class="keycap">L</div>
+            </div>
+            <div class="mini-note desktop-note">Alternate A and L instead of lazily mashing one key.</div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">Mobile controls</div>
+            <div class="mini-note desktop-note">On mobile, use the big A and L buttons below.</div>
+            <div class="mobile-buttons">
+              <button id="btnA" class="tap-btn">A</button>
+              <button id="btnL" class="tap-btn">L</button>
+            </div>
+            <div class="mini-note">Hammer them like the table owes you money.</div>
+          </div>
+        </div>
+
+        <div class="message-grid">
+          <div class="panel" id="messageBox">Hit start, then absolutely destroy the buttons for Amelia.</div>
+          <div class="panel">Nihat gains points automatically and way too quickly. So you cannot coast. You need nonstop panic-level speed.</div>
+        </div>
+
+        <div class="actions">
+          <button id="startBtn" class="action">Start</button>
+          <button id="resetBtn" class="action secondary">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ROUND_TIME = 20;
+    const WIN_SCORE = 100;
+
+    const state = {
+      started: false,
+      finished: false,
+      timeLeft: ROUND_TIME,
+      ameliaScore: 0,
+      nihatScore: 0,
+      best: Number(localStorage.getItem('amelia-food-best') || 0),
+      heat: 0,
+      streak: 0,
+      bestBurst: 0,
+      lastKey: '',
+      ameliaMashPower: 0,
+      nihatMomentum: 0,
+      intervalId: null,
+      decayId: null,
+      winner: ''
+    };
+
+    const el = {
+      timeValue: document.getElementById('timeValue'),
+      bestValue: document.getElementById('bestValue'),
+      ameliaValue: document.getElementById('ameliaValue'),
+      nihatValue: document.getElementById('nihatValue'),
+      ameliaScoreLabel: document.getElementById('ameliaScoreLabel'),
+      nihatScoreLabel: document.getElementById('nihatScoreLabel'),
+      ameliaBar: document.getElementById('ameliaBar'),
+      nihatBar: document.getElementById('nihatBar'),
+      heatBar: document.getElementById('heatBar'),
+      heatValue: document.getElementById('heatValue'),
+      streakValue: document.getElementById('streakValue'),
+      bestBurstValue: document.getElementById('bestBurstValue'),
+      ameliaFood: document.getElementById('ameliaFood'),
+      nihatFood: document.getElementById('nihatFood'),
+      messageBox: document.getElementById('messageBox'),
+      winnerBadge: document.getElementById('winnerBadge'),
+      startBtn: document.getElementById('startBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      btnA: document.getElementById('btnA'),
+      btnL: document.getElementById('btnL'),
+      ameliaCard: document.getElementById('ameliaCard')
+    };
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function rand(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function clearTimers() {
+      if (state.intervalId) {
+        clearInterval(state.intervalId);
+        state.intervalId = null;
+      }
+      if (state.decayId) {
+        clearInterval(state.decayId);
+        state.decayId = null;
+      }
+    }
+
+    function setMessage(text) {
+      el.messageBox.textContent = text;
+    }
+
+    function renderFood(container, count) {
+      const items = Math.min(count, 18);
+      container.innerHTML = '';
+      for (let i = 0; i < items; i++) {
+        const d = document.createElement('div');
+        d.textContent = '🍗';
+        container.appendChild(d);
+      }
+    }
+
+    function render() {
+      el.timeValue.textContent = `${state.timeLeft.toFixed(1)}s`;
+      el.bestValue.textContent = String(state.best);
+      el.ameliaValue.textContent = String(state.ameliaScore);
+      el.nihatValue.textContent = String(state.nihatScore);
+      el.ameliaScoreLabel.textContent = String(state.ameliaScore);
+      el.nihatScoreLabel.textContent = String(state.nihatScore);
+      el.ameliaBar.style.width = `${clamp((state.ameliaScore / WIN_SCORE) * 100, 0, 100)}%`;
+      el.nihatBar.style.width = `${clamp((state.nihatScore / WIN_SCORE) * 100, 0, 100)}%`;
+      el.heatBar.style.width = `${state.heat}%`;
+      el.heatValue.textContent = `${Math.round(state.heat)}%`;
+      el.streakValue.textContent = String(state.streak);
+      el.bestBurstValue.textContent = String(state.bestBurst);
+      renderFood(el.ameliaFood, Math.floor(state.ameliaScore / 6));
+      renderFood(el.nihatFood, Math.floor(state.nihatScore / 5));
+
+      if (state.winner) {
+        el.winnerBadge.style.display = 'inline-block';
+        el.winnerBadge.textContent = state.winner;
+      } else {
+        el.winnerBadge.style.display = 'none';
+      }
+
+      if (state.heat > 8) el.ameliaCard.classList.add('flash');
+      else el.ameliaCard.classList.remove('flash');
+
+      el.startBtn.disabled = state.started;
+    }
+
+    function resetGame() {
+      clearTimers();
+      state.started = false;
+      state.finished = false;
+      state.timeLeft = ROUND_TIME;
+      state.ameliaScore = 0;
+      state.nihatScore = 0;
+      state.heat = 0;
+      state.streak = 0;
+      state.bestBurst = 0;
+      state.lastKey = '';
+      state.ameliaMashPower = 0;
+      state.nihatMomentum = 0;
+      state.winner = '';
+      setMessage('Hit start, then absolutely destroy the buttons for Amelia.');
+      render();
+    }
+
+    function finishGame() {
+      clearTimers();
+      state.started = false;
+      state.finished = true;
+
+      if (state.ameliaScore > state.nihatScore) {
+        state.winner = 'Amelia wins';
+        setMessage('Amelia wins. She actually beat Nihat in a food contest, which feels borderline impossible.');
+        if (state.ameliaScore > state.best) {
+          state.best = state.ameliaScore;
+          localStorage.setItem('amelia-food-best', String(state.best));
+        }
+      } else if (state.nihatScore > state.ameliaScore) {
+        state.winner = 'Nihat wins';
+        setMessage('Nihat wins. He ate like a small natural disaster and never even slowed down.');
+      } else {
+        state.winner = 'Draw';
+        setMessage('It is a draw. Somehow the table lost and neither of them looks done.');
+      }
+
+      render();
+    }
+
+    function pressEat(key) {
+      if (!state.started || state.finished) return;
+
+      let gain = 2.2;
+      if (state.lastKey && state.lastKey !== key) {
+        gain += 1.4;
+        state.streak += 1;
+      } else {
+        state.streak = Math.max(0, state.streak - 1);
+      }
+
+      const burstBonus = Math.min(5, Math.floor((state.streak + 1) / 4));
+      gain += burstBonus;
+      state.bestBurst = Math.max(state.bestBurst, state.streak + 1);
+      state.lastKey = key;
+
+      state.ameliaMashPower += gain;
+      state.heat = clamp(state.heat + gain * 3.6, 0, 100);
+
+      if (burstBonus >= 2) {
+        setMessage('Massive burst. Keep going. Nihat is still chewing.');
+      }
+
+      render();
+    }
+
+    function startGame() {
+      resetGame();
+      state.started = true;
+      setMessage('Go! Amelia is locked in. Mash hard.');
+      render();
+
+      state.intervalId = setInterval(() => {
+        state.timeLeft = Math.max(0, +(state.timeLeft - 0.1).toFixed(1));
+
+        const ameliaGain = Math.floor(state.ameliaMashPower * 0.82);
+        state.ameliaScore = clamp(state.ameliaScore + ameliaGain, 0, WIN_SCORE);
+
+        const nihatBase = 3.8;
+        const nihatBurst = Math.random() < 0.24 ? 4 : 0;
+        state.nihatMomentum = clamp(state.nihatMomentum + rand(0.25, 1.25), 0, 8.5);
+        const nihatGain = Math.floor(nihatBase + state.nihatMomentum + nihatBurst);
+        state.nihatScore = clamp(state.nihatScore + nihatGain, 0, WIN_SCORE);
+
+        state.ameliaMashPower = Math.max(0, state.ameliaMashPower - 4.8);
+        state.nihatMomentum = Math.max(0, state.nihatMomentum - 0.35);
+
+        if (state.timeLeft <= 0 || state.ameliaScore >= WIN_SCORE || state.nihatScore >= WIN_SCORE) {
+          finishGame();
+          return;
+        }
+
+        render();
+      }, 100);
+
+      state.decayId = setInterval(() => {
+        state.heat = Math.max(0, state.heat - 4);
+        render();
+      }, 60);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+      if (key === 'a' || key === 'l') pressEat(key);
+    });
+
+    el.btnA.addEventListener('pointerdown', () => pressEat('a'));
+    el.btnL.addEventListener('pointerdown', () => pressEat('l'));
+    el.startBtn.addEventListener('click', startGame);
+    el.resetBtn.addEventListener('click', resetGame);
+
+    render();
+  </script>
+</body>
+</html>
